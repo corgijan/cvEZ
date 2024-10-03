@@ -1,6 +1,8 @@
-mod sbom;
-mod cve;
-use crate::sbom::SBom;
+use crate::models::sbom;
+use crate::models::cve;
+
+mod models;
+
 
 fn main() {
     let cve = include_str!("../cve.json");
@@ -14,10 +16,14 @@ fn main() {
     // check if affected.repo is in sbom
     for affected in sbom.components {
         for a in affected.component.iter(){
+            dbg!(&a);
             for a in a.iter(){
                 for a in a.external_references.iter(){
                     for a in a.reference.iter(){
                         for a in a.iter() {
+                            if a.r#type.is_some() && a.r#type.as_ref().unwrap() == "git" {
+                                repo1 = Some(strip_git_repo(a.url.as_ref().unwrap()));
+                            }
                             if a.url.is_some() {
                                 repo1 = Some(strip_git_repo(a.url.as_ref().unwrap()));
                             }
@@ -31,7 +37,6 @@ fn main() {
     for a in cve.containers.iter(){
         for a in a.cna.iter(){
             for a in a.affected.iter(){
-                dbg!(a);
                 for a in a.iter(){
                     if a.repo.is_some(){
                         repo2 = Some(strip_git_repo(a.repo.as_ref().unwrap()));

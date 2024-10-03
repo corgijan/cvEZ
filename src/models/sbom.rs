@@ -68,8 +68,7 @@ pub struct ExternalReferences {
 
 #[derive(Serialize, Deserialize, Debug,Clone )]
 pub struct Reference {
-    #[serde(rename = "@type")]
-    pub reference_type: Option<String>,
+    pub r#type: Option<String>,
     pub url: Option<String>,
 }
 
