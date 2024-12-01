@@ -1,8 +1,13 @@
+use diesel::{Connection, RunQueryDsl, SelectableHelper, SqliteConnection};
+use diesel::associations::HasTable;
+use diesel::query_dsl::limit_dsl::LimitDsl;
 use crate::models::sbom;
 use crate::models::cve;
+use crate::models::post::{Post, NewPost};
+use crate::schema::posts;
 
 mod models;
-
+mod schema;
 
 fn main() {
     let cve = include_str!("../cve.json");
@@ -50,6 +55,25 @@ fn main() {
 
 
     println!("Hello, world!");
+    let database_url = "sqlite://database.sqlite3";
+    let mut con = SqliteConnection::establish(&database_url).unwrap_or_else(|_| panic!("Error connecting to {}", database_url));
+
+    let new_post = NewPost { title: "Title", body: "ImaABody BODY", published: true };
+
+    //diesel::insert_into(crate::schema::posts::table).values(&new_post).get_results::<Post>(&mut con).expect("Error inserting post");
+
+
+    use self::schema::posts::dsl::*;
+    let results: Vec<Post> = posts
+        .load(&mut con)
+        .expect("Error loading posts");
+
+    println!("Displaying {} posts", results.len());
+    for post in results {
+        println!("{}", post.title);
+        println!("-----------\n");
+        println!("{}", post.body);
+    }
 }
 
 fn strip_git_repo(repo: &str) -> String {
